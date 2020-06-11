@@ -1,0 +1,38 @@
+<h1 class="text-muted font-weight-bold" style="margin-left: 100px; margin-top: 50px;">
+  ng-links demo
+</h1>
+<h3 class="text-muted" style="margin-left: 100px;">
+  number of links: {{count}}
+</h3>
+<ng-link-container></ng-link-container>
+<ng-container *ngIf="!hideEndpoints">
+  <ng-container *ngFor="let link of links">
+
+    <app-test-endpoint [x]="link.start.x"
+                       [y]="link.start.y - (buttonHeight / 2)"
+                       [height]="buttonHeight"
+                       [width]="buttonWidth"
+                       [link]="link"
+                       [start]="true">
+      START
+      <div>
+        <span class="badge badge-secondary mr-1">{{link.type}}</span>
+        <span class="badge badge-secondary">{{link.id}}</span>
+      </div>
+    </app-test-endpoint>
+
+    <app-test-endpoint [x]="getButtonEndX(link)"
+                       [y]="link.end.y - (buttonHeight / 2)"
+                       [height]="buttonHeight"
+                       [width]="buttonWidth"
+                       [link]="link"
+                       [end]="true">
+      END
+      <div>
+        <span class="badge badge-secondary mr-1">{{link.type}}</span>
+        <span class="badge badge-secondary">{{link.id}}</span>
+      </div>
+    </app-test-endpoint>
+
+  </ng-container>
+</ng-container>
