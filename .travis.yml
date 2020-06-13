@@ -15,7 +15,6 @@ install:
 
 script:
   - yarn lint
-  - yarn test-headless
   - yarn build -- --prod --base-href "/ng-links/"
 
 deploy:
