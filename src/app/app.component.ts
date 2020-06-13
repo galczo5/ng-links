@@ -1,4 +1,4 @@
-import {AfterViewInit, Component} from '@angular/core';
+import {AfterViewInit, ChangeDetectorRef, Component} from '@angular/core';
 import {NgLinkRepositoryService} from '../../projects/ng-link/src/lib/ng-link-repository.service';
 import {NgLink, NgLinkType} from '../../projects/ng-link/src/lib/ng-link';
 
@@ -24,7 +24,8 @@ export class AppComponent implements AfterViewInit {
   count = 0;
   hideEndpoints = false;
 
-  constructor(private readonly linkRepositoryService: NgLinkRepositoryService) {
+  constructor(private readonly linkRepositoryService: NgLinkRepositoryService,
+              private readonly changeDetectorRef: ChangeDetectorRef) {
     const urlParams = new URLSearchParams(window.location.search);
     this.count = +urlParams.get('count') || 4;
     this.hideEndpoints = urlParams.get('noEndpoints') === 'true';
@@ -40,6 +41,7 @@ export class AppComponent implements AfterViewInit {
 
   ngAfterViewInit() {
     this.generateItems();
+    this.changeDetectorRef.detectChanges();
   }
 
   private generateItems(): void {
