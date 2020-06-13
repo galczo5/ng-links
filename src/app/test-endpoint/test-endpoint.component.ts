@@ -1,18 +1,17 @@
-import {AfterViewInit, Component, ElementRef, Input, NgZone, OnInit, Renderer2, ViewChild} from '@angular/core';
+import {Component, ElementRef, Input, NgZone, OnInit, Renderer2, ViewChild} from '@angular/core';
 import {NgLink, NgLinkType} from '../../../projects/ng-link/src/lib/ng-link';
 import {NgLinkRepositoryService} from '../../../projects/ng-link/src/lib/ng-link-repository.service';
-import {fromEvent} from 'rxjs';
+import {animationFrameScheduler, fromEvent} from 'rxjs';
 import {switchMap, takeUntil, throttleTime} from 'rxjs/operators';
+import {animationFrame} from 'rxjs/internal/scheduler/animationFrame';
 
 @Component({
   selector: 'app-test-endpoint',
   template: `
     <button #button class="btn btn-info d-flex justify-content-between align-items-center"
-            [style.top.px]="y"
-            [style.left.px]="x"
             [style.width.px]="width"
             [style.height.px]="height"
-            style="position: absolute;">
+            style="position: absolute; top: 0; left: 0; will-change: transform;">
       <ng-content></ng-content>
     </button>
   `
@@ -50,6 +49,7 @@ export class TestEndpointComponent implements OnInit {
 
   ngOnInit() {
     this.ngZone.runOutsideAngular(() => this.dragAndDrop());
+    this.setPosition(this.x, this.y);
   }
 
   private dragAndDrop(): void {
@@ -58,21 +58,21 @@ export class TestEndpointComponent implements OnInit {
         switchMap(() => {
           return fromEvent(document, 'mousemove')
             .pipe(
-              throttleTime(20),
+              throttleTime(0, animationFrameScheduler),
               takeUntil(fromEvent(document, 'mouseup'))
             );
         })
       )
       .subscribe((event: MouseEvent) => {
-        this.setPosition(event.clientX, event.clientY);
-        this.updateLink(event.clientX, event.clientY);
+        const scrollTop = window.pageYOffset;
+        this.setPosition(event.clientX, event.clientY + scrollTop);
+        this.updateLink(event.clientX, event.clientY + scrollTop);
       });
   }
 
   private setPosition(x: number, y: number): void {
     const el = this.button.nativeElement;
-    this.renderer.setStyle(el, 'top', y + 'px');
-    this.renderer.setStyle(el, 'left', x + 'px');
+    this.renderer.setStyle(el, 'transform', `translateY(${y}px) translateX(${x}px)`);
   }
 
   // Ugly, but its only a demo
