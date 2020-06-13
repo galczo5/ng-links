@@ -10,3 +10,4 @@ Simple and fast linking module for Angular.
 ## Contribution
 
 ## License
+MIT
