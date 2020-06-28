@@ -2,15 +2,13 @@ import { Injectable } from '@angular/core';
 import {NgLink} from './ng-link';
 import {Observable, ReplaySubject, Subject} from 'rxjs';
 
-export type NgLinkUpdate = { id: string, link: Partial<NgLink> };
-
 @Injectable({
   providedIn: 'root'
 })
 export class NgLinkRepositoryService {
 
   private readonly linksAdded$: ReplaySubject<Array<NgLink>> = new ReplaySubject<Array<NgLink>>(1);
-  private readonly linksUpdated$: ReplaySubject<Array<NgLinkUpdate>> = new ReplaySubject<Array<NgLinkUpdate>>();
+  private readonly linksUpdated$: ReplaySubject<Array<NgLink>> = new ReplaySubject<Array<NgLink>>();
   private readonly linksDeleted$: ReplaySubject<Array<string>> = new ReplaySubject<Array<string>>();
 
   addLinks(links: Array<NgLink>): void {
@@ -21,7 +19,7 @@ export class NgLinkRepositoryService {
     this.linksDeleted$.next(ids);
   }
 
-  updateLink(links: Array<NgLinkUpdate>): void {
+  updateLink(links: Array<NgLink>): void {
     this.linksUpdated$.next(links);
   }
 
@@ -33,7 +31,7 @@ export class NgLinkRepositoryService {
     return this.linksDeleted$.asObservable();
   }
 
-  selectLinksUpdated(): Observable<Array<NgLinkUpdate>> {
+  selectLinksUpdated(): Observable<Array<NgLink>> {
     return this.linksUpdated$.asObservable();
   }
 

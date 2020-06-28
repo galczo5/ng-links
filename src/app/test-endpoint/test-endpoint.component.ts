@@ -3,7 +3,6 @@ import {NgLink, NgLinkType} from '../../../projects/ng-link/src/lib/ng-link';
 import {NgLinkRepositoryService} from '../../../projects/ng-link/src/lib/ng-link-repository.service';
 import {animationFrameScheduler, fromEvent} from 'rxjs';
 import {switchMap, takeUntil, throttleTime} from 'rxjs/operators';
-import {animationFrame} from 'rxjs/internal/scheduler/animationFrame';
 
 @Component({
   selector: 'app-test-endpoint',
@@ -12,6 +11,8 @@ import {animationFrame} from 'rxjs/internal/scheduler/animationFrame';
             [style.width.px]="width"
             [style.height.px]="height"
             style="position: absolute; top: 0; left: 0; will-change: transform;">
+      <ng-container *ngIf="start">START</ng-container>
+      <ng-container *ngIf="end">END</ng-container>
       <ng-content></ng-content>
     </button>
   `
@@ -78,58 +79,98 @@ export class TestEndpointComponent implements OnInit {
   // Ugly, but its only a demo
   private updateLink(newX: number, newY: number): void {
     const halfOfHeight = this.height / 2;
-    const y = newY + halfOfHeight;
 
+    const y = newY + halfOfHeight;
     const endOfBlock = newX + this.width;
 
     if (this.link.type === NgLinkType.ES) {
-      if (this.start) {
-        this.linkRepositoryService.updateLink([{
-          id: this.link.id,
-          link: {start: {x: endOfBlock, y}}
-        }]);
-      } else if (this.end) {
-        this.linkRepositoryService.updateLink([{
-          id: this.link.id,
-          link: {end: {x: newX, y}}
-        }]);
-      }
+      this.updateES(endOfBlock, y, newX);
     } else if (this.link.type === NgLinkType.SE) {
-      if (this.start) {
-        this.linkRepositoryService.updateLink([{
-          id: this.link.id,
-          link: {start: {x: newX, y}}
-        }]);
-      } else if (this.end) {
-        this.linkRepositoryService.updateLink([{
-          id: this.link.id,
-          link: {end: {x: endOfBlock, y}}
-        }]);
-      }
+      this.updateSE(newX, y, endOfBlock);
     } else if (this.link.type === NgLinkType.EE) {
-      if (this.start) {
-        this.linkRepositoryService.updateLink([{
-          id: this.link.id,
-          link: {start: {x: endOfBlock, y}}
-        }]);
-      } else if (this.end) {
-        this.linkRepositoryService.updateLink([{
-          id: this.link.id,
-          link: {end: {x: endOfBlock, y}}
-        }]);
-      }
+      this.updateEE(endOfBlock, y);
     } else if (this.link.type === NgLinkType.SS) {
-      if (this.start) {
-        this.linkRepositoryService.updateLink([{
-          id: this.link.id,
-          link: {start: {x: newX, y}}
-        }]);
-      } else if (this.end) {
-        this.linkRepositoryService.updateLink([{
-          id: this.link.id,
-          link: {end: {x: newX, y}}
-        }]);
-      }
+      this.updateSS(newX, y);
+    }
+  }
+
+  private updateSS(newX: number, y: number) {
+    if (this.start) {
+      this.linkRepositoryService.updateLink([{
+        ...this.link,
+        start: {
+          x: newX,
+          y
+        }
+      }]);
+    } else if (this.end) {
+      this.linkRepositoryService.updateLink([{
+        ...this.link,
+        end: {
+          x: newX,
+          y
+        }
+      }]);
+    }
+  }
+
+  private updateEE(endOfBlock: number, y: number) {
+    if (this.start) {
+      this.linkRepositoryService.updateLink([{
+        ...this.link,
+        start: {
+          x: endOfBlock,
+          y
+        }
+      }]);
+    } else if (this.end) {
+      this.linkRepositoryService.updateLink([{
+        ...this.link,
+        end: {
+          x: endOfBlock,
+          y
+        }
+      }]);
+    }
+  }
+
+  private updateSE(newX: number, y: number, endOfBlock: number) {
+    if (this.start) {
+      this.linkRepositoryService.updateLink([{
+        ...this.link,
+        start: {
+          x: newX,
+          y
+        }
+      }]);
+    } else if (this.end) {
+      this.linkRepositoryService.updateLink([{
+        ...this.link,
+        end: {
+          x: endOfBlock,
+          y
+        }
+      }]);
+    }
+  }
+
+  private updateES(endOfBlock: number, y: number, newX: number) {
+    if (this.start) {
+      this.linkRepositoryService.updateLink([{
+        ...this.link,
+        start: {
+          x: endOfBlock,
+          y
+        }
+      }]);
+    } else if (this.end) {
+      this.linkRepositoryService.updateLink([{
+        ...this.link,
+        end: {
+          x: newX,
+          y
+        }
+      }]);
     }
   }
 }
