@@ -1,7 +1,17 @@
-import {ChangeDetectorRef, Component, ElementRef, OnInit, Renderer2, ViewChild} from '@angular/core';
-import {NgLinkRepositoryService} from './ng-link-repository.service';
+import {
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output,
+  Renderer2,
+  ViewChild
+} from '@angular/core';
 import {NgLink} from './ng-link';
 import {NgLinkEndpointService} from './ng-link-endpoint.service';
+import {NgViewportRepositoryService} from './ng-viewport-repository.service';
 
 type UpdateProps = { width?: number, dashed?: boolean, color?: string };
 
@@ -32,7 +42,7 @@ export class NgLinkContainerComponent implements OnInit {
   private linksElements: Map<string, HTMLElement> = new Map<string, HTMLElement>();
   private linksMap: Map<string, NgLink> = new Map<string, NgLink>();
 
-  constructor(private readonly linkRepositoryService: NgLinkRepositoryService,
+  constructor(private readonly linkRepositoryService: NgViewportRepositoryService,
               private readonly linkEndpointService: NgLinkEndpointService,
               private readonly changeDetectorRef: ChangeDetectorRef,
               private readonly renderer: Renderer2) {
@@ -51,13 +61,8 @@ export class NgLinkContainerComponent implements OnInit {
           const id = updateRequest.id;
           const originalLink = this.linksMap.get(id);
 
-          const updatedLink = {
-            ...originalLink,
-            ...updateRequest.link
-          };
-
-          this.linksMap.set(id, updatedLink);
-          const props = this.getUpdateProps(originalLink, updatedLink);
+          this.linksMap.set(id, updateRequest);
+          const props = this.getUpdateProps(originalLink, updateRequest);
           this.updateLinkProperties(id, props);
         }
       });

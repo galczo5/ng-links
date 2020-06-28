@@ -1,6 +1,8 @@
 import {AfterViewInit, ChangeDetectorRef, Component} from '@angular/core';
 import {NgLinkRepositoryService} from '../../projects/ng-link/src/lib/ng-link-repository.service';
-import {NgLink, NgLinkType} from '../../projects/ng-link/src/lib/ng-link';
+import {NgLink, NgLinkEndpoint, NgLinkType} from '../../projects/ng-link/src/lib/ng-link';
+import {Subject} from 'rxjs';
+import {auditTime, debounceTime} from 'rxjs/operators';
 
 const style = {
   color: 'darkgray',
@@ -16,6 +18,7 @@ export class AppComponent implements AfterViewInit {
   static ITERATOR = 2;
 
   links: Array<NgLink> = [];
+  visibleEndpoints: Array<NgLink> = [];
   linkTypes = [NgLinkType.ES, NgLinkType.SE, NgLinkType.SS, NgLinkType.EE];
 
   buttonWidth = 120;
@@ -24,11 +27,37 @@ export class AppComponent implements AfterViewInit {
   count = 0;
   hideEndpoints = false;
 
+  height = 0;
+
+  private viewportTop = 0;
+  private viewportLeft = 0;
+  private viewportHeight = 0;
+  private viewportWidth = 0;
+
+  private viewportChange$: Subject<void> = new Subject<void>();
+
   constructor(private readonly linkRepositoryService: NgLinkRepositoryService,
               private readonly changeDetectorRef: ChangeDetectorRef) {
     const urlParams = new URLSearchParams(window.location.search);
     this.count = +urlParams.get('count') || 4;
     this.hideEndpoints = urlParams.get('noEndpoints') === 'true';
+  }
+
+  ngAfterViewInit() {
+    this.generateItems();
+
+    this.height = AppComponent.ITERATOR * 100;
+
+    this.changeDetectorRef.detectChanges();
+
+    this.viewportChange$
+      .pipe(debounceTime(50))
+      .subscribe(() => {
+        this.visibleEndpoints = this.links.filter(link => {
+          return this.isEndpointVisible(link.start) || this.isEndpointVisible(link.end);
+        });
+        this.changeDetectorRef.detectChanges();
+      });
   }
 
   getButtonEndX(link: NgLink): number {
@@ -39,9 +68,32 @@ export class AppComponent implements AfterViewInit {
     }
   }
 
-  ngAfterViewInit() {
-    this.generateItems();
-    this.changeDetectorRef.detectChanges();
+  isEndpointVisible(endpoint: NgLinkEndpoint): boolean {
+    const viewportMargin = 300;
+    return endpoint.y + viewportMargin > this.viewportTop &&
+      endpoint.y - viewportMargin < this.viewportTop + this.viewportHeight &&
+      endpoint.x + viewportMargin > this.viewportLeft &&
+      endpoint.x - viewportMargin < this.viewportLeft + this.viewportWidth;
+  }
+
+  setViewportHeight($event: number): void {
+    this.viewportHeight = $event;
+    this.viewportChange$.next();
+  }
+
+  setViewportWidth($event: number): void {
+    this.viewportWidth = $event;
+    this.viewportChange$.next();
+  }
+
+  setViewportLeft($event: number): void {
+    this.viewportLeft = $event;
+    this.viewportChange$.next();
+  }
+
+  setViewportTop($event: number): void {
+    this.viewportTop = $event;
+    this.viewportChange$.next();
   }
 
   private generateItems(): void {

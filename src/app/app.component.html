@@ -1,38 +1,33 @@
-<h1 class="text-muted font-weight-bold" style="margin-left: 100px; margin-top: 50px;">
-  ng-links demo
-</h1>
-<h3 class="text-muted" style="margin-left: 100px;">
-  number of links: {{count}}
-</h3>
-<ng-link-container></ng-link-container>
-<ng-container *ngIf="!hideEndpoints">
-  <ng-container *ngFor="let link of links">
+<ng-link-viewport (heightChanged)="setViewportHeight($event)"
+                  (widthChanged)="setViewportWidth($event)"
+                  (leftChanged)="setViewportLeft($event)"
+                  (topChanged)="setViewportTop($event)">
 
-    <app-test-endpoint [x]="link.start.x"
-                       [y]="link.start.y - (buttonHeight / 2)"
-                       [height]="buttonHeight"
-                       [width]="buttonWidth"
-                       [link]="link"
-                       [start]="true">
-      START
-      <div>
-        <span class="badge badge-secondary mr-1">{{link.type}}</span>
-        <span class="badge badge-secondary">{{link.id}}</span>
-      </div>
-    </app-test-endpoint>
+  <ng-container *ngIf="!hideEndpoints">
 
-    <app-test-endpoint [x]="getButtonEndX(link)"
-                       [y]="link.end.y - (buttonHeight / 2)"
-                       [height]="buttonHeight"
-                       [width]="buttonWidth"
-                       [link]="link"
-                       [end]="true">
-      END
-      <div>
-        <span class="badge badge-secondary mr-1">{{link.type}}</span>
-        <span class="badge badge-secondary">{{link.id}}</span>
-      </div>
-    </app-test-endpoint>
+    <div [style.height.px]="height">
+      <ng-container *ngFor="let link of visibleEndpoints">
+        <app-test-endpoint *ngIf="isEndpointVisible(link.start)"
+                           [x]="link.start.x"
+                           [y]="link.start.y - (buttonHeight / 2)"
+                           [height]="buttonHeight"
+                           [width]="buttonWidth"
+                           [link]="link"
+                           [start]="true">
+          <app-test-endpoint-info [link]="link"></app-test-endpoint-info>
+        </app-test-endpoint>
+        <app-test-endpoint *ngIf="isEndpointVisible(link.end)"
+                           [x]="getButtonEndX(link)"
+                           [y]="link.end.y - (buttonHeight / 2)"
+                           [height]="buttonHeight"
+                           [width]="buttonWidth"
+                           [link]="link"
+                           [end]="true">
+          <app-test-endpoint-info [link]="link"></app-test-endpoint-info>
+        </app-test-endpoint>
+
+      </ng-container>
+    </div>
 
   </ng-container>
-</ng-container>
+</ng-link-viewport>
